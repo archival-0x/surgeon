@@ -106,12 +106,12 @@ def main():
         buf.insert(line + i, template)
         i += 1
 
-    # if debug mode on, print out final formatted code with docstrings
-    if DEBUG:
-        print("\n\n====================================")
-        print("Final docstring-linted code:\n")
-        print("".join(buf))
-
+    # print out final formatted code with docstrings
+    print("\n\n====================================")
+    print("Final docstring-linted code:\n")
+    print("".join(buf))
+    print("\n\n====================================")
+   
     # if flag is set, merge our docstring-linted changes into our original source
     if args.append:
         with open(args.filepath, 'w') as f_write:
