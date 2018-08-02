@@ -11,6 +11,12 @@ docstring, and then injecting it based on a user-supplied template.
 ## Installation
 
 ```
+$ pip install pysugeon --user
+```
+
+or if you choose to manually:
+
+```
 $ python setup.py install
 ```
 
