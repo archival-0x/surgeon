@@ -1,61 +1,65 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python3
 import os
+import logging
 import argparse
 import ast
 
-DEBUG = False
+logger = logging.getLogger(__name__)
 
+# define node types to implant docstrings
 NODE_TYPES = {
     ast.ClassDef: 'Class',
     ast.FunctionDef: 'Function/Method',
     ast.Module: 'Module'
 }
 
-def main():
 
-    # initialize our parser
+def main():
     parser = argparse.ArgumentParser()
-    
-    # create argument group for required arguments
     required = parser.add_argument_group('required arguments')
+
+    # required arguments
     required.add_argument('-f', '--filepath',
-                        dest='filepath',
+                        dest='filepath', required=True,
                         help='file to add docstring')
     required.add_argument('-c', '--configuration',
-                        dest='configuration',
+                        dest='configuration', required=True,
                         help='configuration file that contains docstring')
-    parser.add_argument('-v', '--verbosity',
-                        dest='verbosity',
+
+    # other options
+    parser.add_argument('-d', '--debug',
                         action='store_true',
-                        help='if set, more verbose outputs will be printed')
+                        dest='debug', required=False,
+                        help='if set, verbose debug outputs will be printed')
     parser.add_argument('-a', '--append-changes',
-                        dest='append',
                         action='store_true',
+                        dest='append', required=False,
                         help='if set, changes are saved into original source')
 
     # parse arguments
     args = parser.parse_args()
 
-    # turn on DEBUG if verbosity flag is set
-    DEBUG = args.verbosity   
- 
+    # log if debug flag is set
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     # check for required arguments
     man_options = ['filepath', 'configuration']
     for m in man_options:
         if not args.__dict__[m]:
             parser.print_help()
             return 1
-    
+
     # check if filepath exists and is a file
     if not os.path.isfile(args.filepath):
-        print("File doesn't exist. Exiting.")
-        return 1
-  
-    # open file for reading and store contents 
-    with open(args.filepath, 'r') as f: 
+        raise RuntimeError("File doesn't exist. Exiting.")
+
+    # open file for reading and store contents
+    with open(args.filepath, 'r') as f:
         source = f.read()
-    
+
     # open configuration path for docstring template
     with open(args.configuration, 'r') as f:
         template = f.read()
@@ -64,37 +68,31 @@ def main():
     try:
         code = ast.parse(source)
     except SyntaxError:
-        print("File contains a syntatical error. Fix before running again")
-        return 1
+        raise RuntimeError("File contains a syntatical error. Fix before running again")
 
     # go for each node over the AST
     no_docstring_lines = []
     for node in code.body:
+
         # check if module, class, and/or function
         if isinstance(node, tuple(NODE_TYPES)):
+
             # if there is no docstring, get the line number
             # since we can't mutate docstring code
             docstring = ast.get_docstring(node)
 
             if docstring is None:
                 lineno = getattr(node, 'lineno', None)
-                if DEBUG:
-                    print("\nFound node line no. with no docstring: {}".format(lineno))
+                logger.debug(f"Found node line no. with no docstring: {lineno}")
                 no_docstring_lines.append(lineno)
-            
-            # if debug mode is on, print out nodes with docstrings
-            elif DEBUG and docstring is not None:
-                print("\n\n{}".format(node.name))
-                print("------------------------------")
-                print("Available Docstring:\n\"{}\"".format(docstring)) 
-             
-    # if debug mode on, print out how many nodes with no docstrings 
-    if DEBUG:
-        print("\n\n{} nodes have no docstrings." \
-              .format(len(no_docstring_lines)))
+
+            else:
+                logger.debug(f"{node.name}: {docstring}")
+
+    # if debug mode on, print out how many nodes with no docstrings
+    logger.debug(f"{len(no_docstring_lines)} nodes have no docstrings.")
 
     # re-open file, this time, store as buffer for format purposes
-    # TODO: improve ??
     with open(args.filepath, 'r') as buf_file:
         buf = buf_file.readlines()
 
@@ -107,17 +105,13 @@ def main():
         i += 1
 
     # print out final formatted code with docstrings
-    print("\n\n====================================")
-    print("Final docstring-linted code:\n")
-    print("".join(buf))
-    print("\n\n====================================")
-   
+    print(" ".join(buf))
+    
     # if flag is set, merge our docstring-linted changes into our original source
     if args.append:
         with open(args.filepath, 'w') as f_write:
             f_write.write("".join(buf))
 
-    print("\nSuccess! Added docstrings to code")
     return 0
 
 if __name__ == "__main__":

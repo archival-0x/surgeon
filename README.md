@@ -1,14 +1,14 @@
-# pysurgeon
+# surgeon
 
 Surgically implant docstrings (template, for now) into Python source code
 
-## Introduction
+## intro
 
-__pysurgeon__ "surgically implants" docstrings into Python source code by breaking
+__surgeon__ "surgically implants" docstrings into Python source code by breaking
 down the source into an _abstract syntax tree_, identify nodes that don't have a
 docstring, and then injecting it based on a user-supplied template.
 
-## Installation
+## install
 
 ```
 $ pip install pysugeon --user
@@ -20,31 +20,32 @@ or if you choose to manually:
 $ python setup.py install
 ```
 
-## Usage
+## usage
 
 ```
-usage: pysurgeon.py [-h] [-f FILEPATH] [-c CONFIGURATION] [-v] [-a]
+usage: surgeon [-h] -f FILEPATH -c CONFIGURATION [-d] [-a]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v, --verbosity       if set, more verbose outputs will be printed
+  -d, --debug           if set, verbose debug outputs will be printed
   -a, --append-changes  if set, changes are saved into original source
 
 required arguments:
-  -f FILEPATH, --filepath FILEPATH      
+  -f FILEPATH, --filepath FILEPATH
                         file to add docstring
   -c CONFIGURATION, --configuration CONFIGURATION
                         configuration file that contains docstring
 ```
 
-### See how it works:
+## example
+
+This example implants a template docstring from `my_template.txt` into
+a test file:
 
 ```
-pysurgeon -f tests/test_basic_lint.py -c my_template.txt -a
+$ surgeon -f tests/test_basic_lint.py -c my_template.txt -a
 ```
 
-## TODO
+## license
 
-- [ ] Regex parsing for automatic docstring text generation
-- [ ] Better formatting / text alignment
-- [ ] Better insertion for template within text buffer (C? but a little overkill)
+[mit](https://codemuch.tech/license.txt)

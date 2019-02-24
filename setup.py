@@ -2,11 +2,10 @@ from setuptools import setup, find_packages
 
 
 # setup.py constants
-NAME = "pysurgeon"
-VERSION = "0.1.0"
+NAME = "surgeon"
+VERSION = "0.2.0"
 DESC = "Surgically implant Python docstrings within source code"
-
-REPO = "https://github.com/ex0dus-0x/pysurgeon"
+REPO = "https://github.com/ex0dus-0x/surgeon"
 
 
 # main setup script
@@ -19,13 +18,13 @@ setup(
     download_url = '{}/archive/v{}'.format(REPO, VERSION),
     packages = find_packages(exclude=('tests',)),
     classifiers=(
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "License:: OSI Approved :: MIT License",
         "Operating System :: Linux"
     ),
     entry_points = {
         'console_scripts': [
-            'pysurgeon=src.pysurgeon:main'
+            'surgeon=surgeon.surgeon:main'
         ],
     }
 )
